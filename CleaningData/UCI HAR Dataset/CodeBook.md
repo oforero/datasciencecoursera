@@ -34,7 +34,8 @@ The set of variables that were estimated from these signals are:
 
 ## Transformations used
 
-The transformation is performed in 3 main parts: Subject, Activity and Features
+The transformation is performed in 3 main parts: Subject, Activity and Features.
+This step are repeated for the train and test inputs. 
 
 ### Loading and transforming the Subject IDs
 
@@ -51,4 +52,9 @@ The activity labes is loaded in order to transform the activity from numeric to 
 ### Loading the features
 
 The features are loaded using a similar read.csv command. The column names are loaded from the features.txt file and then used to set the names of the loaded feture.
-Grep was used to project the required columns (mean and std) and filtere
+Grep was used to project the required columns (mean and std), the result is use to select the columns from the features data set.
+
+### Merging the data sets
+
+After the individual process the data sets are merged using cbind, the result is a data set with 68 variables.
+The results of processing the train and test data sources is then merged using rbind.
