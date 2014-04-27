@@ -5,12 +5,10 @@ loadDataFromFolder <- function(folder, activityLabelFile="activity_labels.txt", 
                                activityFile=paste(folder, "/y_", folder, ".txt", sep=""),
                                featureFile=paste(folder, "/X_", folder, ".txt", sep="")) {
   
-  # Load the labels of the main directorz
+  # Load the labels of the main directory
   activityLabels = read.csv(activityLabelFile, sep="", header=FALSE, stringsAsFactors=FALSE)
   colnames(activityLabels) <- c("Levels", "Labels")
   
-  # Load the name of the features
-  featureNames = read.csv(featureNamesFile, sep="", header=FALSE, stringsAsFactors=FALSE)
   
   #Laod and process the subjects file
   subjects = read.csv(subjectFile, sep="", header=FALSE, stringsAsFactors=FALSE)
@@ -19,10 +17,12 @@ loadDataFromFolder <- function(folder, activityLabelFile="activity_labels.txt", 
   # Load and process the activity file
   testActivity = read.csv(activityFile, sep="", header=FALSE, stringsAsFactors=FALSE)
   colnames(testActivity) <- c("Activity")
-  testActivity$Activity = cut(testActivity$Activity, 6, activityLabels$Labels)
+  testActivity$Activity = cut(testActivity$Activity, nrow(activityLabels), activityLabels$Labels)
   
   # Load and process the features file
   testFeatures = read.csv(featureFile, sep="", header=FALSE, stringsAsFactors=FALSE)
+  # Load the name of the features and name the columns
+  featureNames = read.csv(featureNamesFile, sep="", header=FALSE, stringsAsFactors=FALSE)
   colnames(testFeatures) <- featureNames[,2]
   
   # Select only the relevant features
@@ -36,7 +36,7 @@ loadDataFromFolder <- function(folder, activityLabelFile="activity_labels.txt", 
   return(result)
 }
 
-# Load the training data
+# Load the training dataUCI 
 train = loadDataFromFolder("train")
 # Load the testing data
 test = loadDataFromFolder("test")
@@ -45,4 +45,4 @@ test = loadDataFromFolder("test")
 merged = rbind(train, test)
 
 # Write the final data set as a CSV file
-write.csv(merged, "mergedDataSets.csv", quote=FALSE)
+write.csv(merged, "mergedDataSets.csv", quote=FALSE, row.names=FALSE)
