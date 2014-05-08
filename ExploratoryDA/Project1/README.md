@@ -1,3 +1,7 @@
+## Homework
+
+This is my solution to the Exploratory Data Analysis [project 1](Instructions.md).
+
 ## How to run the code 
 
 To facilitate running the code the working directory needs to be set to the folder containing the scripts:
