@@ -14,20 +14,20 @@ After that it will write a PNG file of the same name as the script in a subdirec
 ### Plot 1
 
 
-![Gobal Active Power (Histogram)](figure/Plot1.png) 
+![Gobal Active Power (Histogram)](figure/plot1.png) 
 
 
 ### Plot 2
 
-![Global Active Power (Lines)](figure/Plot2.png) 
+![Global Active Power (Lines)](figure/plot2.png) 
 
 
 ### Plot 3
 
-![Energy sub metering (Lines)](figure/Plot3.png) 
+![Energy sub metering (Lines)](figure/plot3.png) 
 
 
 ### Plot 4
 
-![Multiple plots in one](figure/Plot4.png) 
+![Multiple plots in one](figure/plot4.png) 
 
