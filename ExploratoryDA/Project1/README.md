@@ -1,6 +1,6 @@
 ## Homework
 
-This is my solution to the Exploratory Data Analysis [project 1](Instructions.md).
+This is my solution to the Exploratory Data Analysis [project 1](INSTRUCTIONS.md).
 
 ## How to run the code 
 
