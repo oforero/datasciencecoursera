@@ -1,5 +1,3 @@
-library(ggplot2)
-
 if(! exists("pollution")) {
   pollution <- readRDS("summarySCC_PM25.rds")
   pollution$fips <- as.factor(pollution$fips)

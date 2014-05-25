@@ -1,5 +1,3 @@
-library(ggplot2)
-
 if(! exists("pollution")) {
   pollution <- readRDS("summarySCC_PM25.rds")
   pollution$fips <- as.factor(pollution$fips)
@@ -28,8 +26,8 @@ png(filename="figure/plot6.png", bg="transparent",
     width=480, height = 480)
 
 colors <- c("darkblue", "red")
-barplot(emissionsPerYear,
-        main="Vehicle Related Emissions Per Year - Baltimore", 
+barplot(emissionsPerYear, beside=TRUE,
+        main="Vehicle Related Emissions Per Year - Baltimore/Los Angeles", 
         xlab="Year", ylab="Tons",
         col=colors)
 legend("topright", bty="n",
