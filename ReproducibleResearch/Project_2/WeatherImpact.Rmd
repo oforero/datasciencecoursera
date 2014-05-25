@@ -75,9 +75,9 @@ percentageOfDamageForEvent <- damagePerType[1] * 100 / damagePerType
 damagePerState <- tapply(damagePerEventAndState$DMG, damagePerEventAndState$STATE, sum)
 damagePerState <- sort(damagePerState[damagePerState > ignoreDmg], decreasing=TRUE)
 mostDamagedStates <- names(damagePerState)
-mostDamagedState <- mostDamagedStates[1]
+mostDamagedState <- as.character(states[states$Abbreviation == mostDamagedStates[1], "State"])
 numberOfDamagedStates <- nrow(mostDamagedState)
-mostDamagedStatePercentage <- damagePerState[1] / totalDamage
+mostDamagedStatePercentage <- damagePerState[1] * 100 / totalDamage
 
 ```
 
