@@ -10,20 +10,18 @@ if(! exists("pollution")) {
 
 baltimore <- pollution[pollution$fips == "24510", ]
 
-png(filename="figure/plot5.png", bg="transparent",
-    width=480, height = 480)
 
 if(! exists("class")) {
   class <- readRDS("Source_Classification_Code.rds")
 }
 
 vehicleSCC <- class[grep("^Highway Veh*",class$Short.Name), "SCC"] 
-vehicleRelated <- pollution[pollution$SCC %in% coalSCC,]
-
-png(filename="figure/plot4.png", bg="transparent",
-    width=480, height = 480)
+vehicleRelated <- baltimore[baltimore$SCC %in% vehicleSCC,]
 
 emissionsPerYear <- tapply(vehicleRelated$Emissions, vehicleRelated$year, sum)
+
+png(filename="figure/plot5.png", bg="transparent",
+    width=480, height = 480)
 
 barplot(emissionsPerYear,
         main="Vehicle Related Emissions Per Year - Baltimore", 

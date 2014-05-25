@@ -7,10 +7,10 @@ if(! exists("pollution")) {
   
 }
 
+emissionsPerYear <- tapply(pollution$Emissions, pollution$year, sum)
+
 png(filename="figure/plot1.png", bg="transparent",
     width=480, height = 480)
-
-emissionsPerYear <- tapply(pollution$Emissions, pollution$year, sum)
 
 barplot(emissionsPerYear,
         main="Emissions Per Year", 

@@ -10,12 +10,13 @@ if(! exists("pollution")) {
 
 baltimore <- pollution[pollution$fips == "24510", ]
 
-png(filename="figure/plot3.png", bg="transparent",
-    width=480, height = 480)
 
 emissionsPerYear <- tapply(baltimore$Emissions, list(baltimore$year, baltimore$type), sum)
 emissionsPerYear <- as.data.frame(as.table(emissionsPerYear))
 colnames(emissionsPerYear) <- c("year", "type", "Emissions")
+
+png(filename="figure/plot3.png", bg="transparent",
+    width=480, height = 480)
 
 ggplot(emissionsPerYear, 
        aes(x = year, y = Emissions, fill=year)) + 

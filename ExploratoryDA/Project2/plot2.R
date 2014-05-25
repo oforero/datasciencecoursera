@@ -8,11 +8,10 @@ if(! exists("pollution")) {
 }
 
 baltimore <- pollution[pollution$fips == "24510", ]
+emissionsPerYear <- tapply(baltimore$Emissions, baltimore$year, sum)
 
 png(filename="figure/plot2.png", bg="transparent",
     width=480, height = 480)
-
-emissionsPerYear <- tapply(baltimore$Emissions, baltimore$year, sum)
 
 barplot(emissionsPerYear,
         main="Emissions Per Year - Baltimore", 

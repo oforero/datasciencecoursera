@@ -13,10 +13,10 @@ if(! exists("class")) {
 coalSCC <- class[grep("*[Cc][Oo][Aa][Ll]*",class$Short.Name), "SCC"] 
 coalRelated <- pollution[pollution$SCC %in% coalSCC,]
 
+emissionsPerYear <- tapply(coalRelated$Emissions, coalRelated$year, sum)
+
 png(filename="figure/plot4.png", bg="transparent",
     width=480, height = 480)
-
-emissionsPerYear <- tapply(coalRelated$Emissions, coalRelated$year, sum)
 
 barplot(emissionsPerYear,
         main="Coal Related Emissions Per Year", 
