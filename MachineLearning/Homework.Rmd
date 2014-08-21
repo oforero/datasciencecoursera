@@ -54,7 +54,7 @@ A review of the data shows that some fields are not lectures from the sensors bu
 
 As a final step used the cleaned data set to create a training and a testing data set.
 
-```{r, cache=TRUE}
+```{r}
 inputDS <- read.csv("pml-training.csv", na.strings=c("", "NA", "#DIV/0!"))
 naColumns <- apply(inputDS, 2, function(x) any(is.na(x)))
 
@@ -72,14 +72,14 @@ summary(training)
 
 The predictors left to create the model are:
 
-```{r, echo=FALSE, cache=TRUE}
+```{r, echo=FALSE}
 featurePlot(x=training[,! names(training) %in% c("classe")], y=training$classe)
 ```
 
 ## A basic model
 I decided to use a decision tree model as a benchmark to compare other models of higher complexity.
 
-```{r, cache=TRUE}
+```{r}
 set.seed(6996)
 
 dtModel <- train(classe ~ ., data=training, method="rpart")
@@ -93,7 +93,7 @@ confusionMatrix(dtModel)
 Next step is to train a model using cross validation to choose the best parameters. 
 I decided to try a random forest model first because in my experience it yields good results. 
 
-```{r, cache=TRUE}
+```{r}
 set.seed(90210)
 
 fitControl <- trainControl(method="cv", number=5, repeats=5, classProbs=TRUE)
@@ -105,7 +105,7 @@ confusionMatrix(rfModel)
 
 ## Estimated Cross-Validation Error 
 
-The estimated error from the model as calculated by CARET is 0.65%. It can be found in the finalModel field.
+The estimated error from the model as calculated by CARET is 0.7%. It can be found in the finalModel field.
 ```{r}
 rfModel$finalModel
 ```
@@ -113,7 +113,7 @@ rfModel$finalModel
 ## Error estimation in the Testing Set 
 
 In the lectures the recomendation is to still use a testing set that had not been used to train the model.
-The error is 0.679% and can be calculated in the following way:
+The error is 1.05% and can be calculated in the following way:
 
 ```{r}
 pred <- predict(rfModel, newdata=testing)
@@ -129,7 +129,7 @@ confMatrix
 ## Conclussion
 
 The Random Forest model takes more time to train than the simple tree model but it has higher accuracy. 
-Given that it achived 99.32% accuracy I decided there is no need to try other complex model.
+Given that it achived 98.9% accuracy I decided there is no need to try other complex model.
 
 The last step is to use the model to predict the labels for Homework evaluation data set:
 
