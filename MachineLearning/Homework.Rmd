@@ -1,0 +1,150 @@
+---
+title: "Coursera - Practical Machine Learning - Project"
+author: "Oscar Forero"
+date: "21 Aug 2014"
+output: html_document
+---
+
+# Practical Machine Learning - Homework
+
+## Description
+
+Train a machine learning model using the following data set:
+[Training](https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv)
+
+Then use the model to predict the class of the following dataset:
+[Testing](https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv)
+
+The data has infomration from sensors weared by people performing a physical excercise, each row is label as correctly performed 'A' or incorrectly perform 'B', 'C', 'D', 'E', the name of the column is 'classe'. 
+The model should predict the classe variable, there is no specific requirement about which other fields to use or not to use.
+
+## Setting up the environment
+
+Import required libraries and set the working directory, you will have to change this if you want to execute the document.
+
+I also use the doMC library to run caret in multiple cores.
+
+```{r, results='hide', message=FALSE}
+library(utils)
+library(caret)
+library(ggplot2)
+library(doMC)
+
+setwd("/Users/Oscar/Classes/JohnsHopkins/datasciencecoursera/MachineLearning")
+registerDoMC(cores = 4)
+
+```
+
+## Download the data files
+
+The following chunk of code should download
+```{r, eval=FALSE}
+download.file("https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv", "pml-training.csv", method="internal")
+
+download.file("https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv", "pml-testing.csv", method="internal")
+
+```
+
+## Loading and cleaning the data, splitting into training and testing data sets
+
+First load the data treating spaces, blanks, divisions by 0 and NA as not a numeric value.
+After looking at the data it is clear that many columns are sparsely populated, because there are many other fully populated fields I decided to remove all columns with NA values.
+
+A review of the data shows that some fields are not lectures from the sensors but labeling information and of little relevance for the model creation. For this reason I removed the columns "X", "user_name", "raw_timestamp_part_1", "raw_timestamp_part_2", "cvtd_timestamp", "new_window", "num_window" 
+
+As a final step used the cleaned data set to create a training and a testing data set.
+
+```{r, cache=TRUE}
+inputDS <- read.csv("pml-training.csv", na.strings=c("", "NA", "#DIV/0!"))
+naColumns <- apply(inputDS, 2, function(x) any(is.na(x)))
+
+completeDS <- inputDS[,!naColumns]
+remove <- c("X", "user_name", "raw_timestamp_part_1", "raw_timestamp_part_2", "cvtd_timestamp", "new_window", "num_window")
+
+cleanDS <- completeDS[, !names(completeDS) %in% remove]
+
+split <- createDataPartition(cleanDS$classe, p=0.7, list=FALSE)
+training <- cleanDS[split,]
+testing <- cleanDS[-split,]
+
+summary(training)
+```
+
+The predictors left to create the model are:
+
+```{r, echo=FALSE, cache=TRUE}
+featurePlot(x=training[,! names(training) %in% c("classe")], y=training$classe)
+```
+
+## A basic model
+I decided to use a decision tree model as a benchmark to compare other models of higher complexity.
+
+```{r, cache=TRUE}
+set.seed(6996)
+
+dtModel <- train(classe ~ ., data=training, method="rpart")
+dtModel$results
+confusionMatrix(dtModel)
+```
+
+
+## Training the model
+
+Next step is to train a model using cross validation to choose the best parameters. 
+I decided to try a random forest model first because in my experience it yields good results. 
+
+```{r, cache=TRUE}
+set.seed(90210)
+
+fitControl <- trainControl(method="cv", number=5, repeats=5, classProbs=TRUE)
+rfModel <- train(classe ~ ., data=training, method="rf", trControl=fitControl)
+
+rfModel$results
+confusionMatrix(rfModel)
+```
+
+## Estimated Cross-Validation Error 
+
+The estimated error from the model as calculated by CARET is 0.65%. It can be found in the finalModel field.
+```{r}
+rfModel$finalModel
+```
+
+## Error estimation in the Testing Set 
+
+In the lectures the recomendation is to still use a testing set that had not been used to train the model.
+The error is 0.679% and can be calculated in the following way:
+
+```{r}
+pred <- predict(rfModel, newdata=testing)
+confMatrix <- confusionMatrix(testing$classe, pred)
+
+error <- 1 - confMatrix$overall[1]
+names(error) <- "error"
+
+error
+confMatrix
+```
+
+## Conclussion
+
+The Random Forest model takes more time to train than the simple tree model but it has higher accuracy. 
+Given that it achived 99.32% accuracy I decided there is no need to try other complex model.
+
+The last step is to use the model to predict the labels for Homework evaluation data set:
+
+```{r}
+pml_write_files = function(x){
+  n = length(x)
+  for(i in 1:n){
+    filename = paste0("problem_id_",i,".txt")
+    write.table(x[i],file=filename,quote=FALSE,row.names=FALSE,col.names=FALSE)
+  }
+}
+
+evalDS <- read.csv("pml-testing.csv")
+pred <- predict(rfModel, newdata=evalDS)
+
+pml_write_files(pred)
+```
+
