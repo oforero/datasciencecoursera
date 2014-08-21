@@ -1,0 +1,133 @@
+Health and Economic impact of weather events in USA
+========================================================
+
+## Synopsis
+* The most damaging to human health in the united states is `r mostDamagingEvent`, which causes `r percentageOfInjuriesForEvent` percent of injuries accross the United States.
+* The following `r numberOfEvents` are responsible for `r percentageOfInjures` of the injuries: `r injuriesEvents`
+* The most economically damaging event in the united states is `r mostDamagingEvent`, which causes `r percentageOfDamagesPerType` percent of economic damage accross the United States.
+* The following `r numberOfDmgEvents` are responsible for `r percentageOfDamagesPerType` of the economic damage: `r damagingEvents`
+
+## Data Processing
+
+### Loading the Raw data from the compress file
+This documents requires the R.utils and pylr packages, please intall it before executing the document.
+I also used a csv to map the state names from its short to its long form. That csv is also read in here.
+
+```{r cache=TRUE}
+library(R.utils)
+bunzip2("StormData.csv.bz2",  overwrite=TRUE, remove=FALSE)
+
+rawStorm <- read.csv("StormData.csv")
+states <- read.csv("states.csv")
+
+```
+
+### Create tables of Injuries per event, state and event and state 
+Grouping Injuries by events and states removing the rows with zero events; because we are looking for the most damaging to the health of the population.
+
+```{r}
+library(plyr)
+
+injuriesPerEventAndState <- ddply(rawStorm, .(EVTYPE, STATE), function(x) sum(x$INJURIES))
+colnames(injuriesPerEventAndState) <- c("EVTYPE", "STATE", "INJURIES")
+injuriesPerEventAndState <- injuriesPerEventAndState[injuriesPerEventAndState$INJURIES > 0, ]
+totalInjuries <- sum(injuriesPerEventAndState$INJURIES)
+oneP <- totalInjuries / 100
+
+injuriesPerType <- tapply(injuriesPerEventAndState$INJURIES, injuriesPerEventAndState$EVTYPE, sum)
+injuriesPerType <- sort(injuriesPerType[injuriesPerType > oneP], decreasing=TRUE)
+numberOfInjuries <- sum(injuriesPerType)
+percentageOfInjures <- numberOfInjuries * 100 / totalInjuries
+injuriesEvents <- rownames(injuriesPerType)
+numberOfEvents <- nrow(injuriesPerType)
+mostInjurningEvent <- names(injuriesPerType[1])
+percentageOfInjuriesForEvent <- injuriesPerType[1] * 100 / totalInjuries
+
+injuriesPerState <- tapply(injuriesPerEventAndState$INJURIES, injuriesPerEventAndState$STATE, sum)
+injuriesPerState <- sort(injuriesPerState[injuriesPerState > oneP], decreasing=TRUE)
+mostAffectedStates <- names(injuriesPerState)
+mostAffectedState <- as.character(states[states$Abbreviation == mostAffectedStates[1], "State"])
+numberOfStates <- nrow(injuriesPerState)
+mostAffectedStatePercentage <- injuriesPerState[1] * 100 / totalInjuries
+```
+
+### Create tables of damage per event, state and event and state 
+Grouping damage by events and states removing the rows with zero damage; because we are looking for the most economically damaging ones.
+
+```{r}
+DMG <- rawStorm$PROPDMG + rawStorm$CROPDMG
+rawStorm$DMG <- DMG
+damagePerEventAndState <- ddply(rawStorm, .(EVTYPE, STATE), function(x) sum(x$DMG))
+colnames(damagePerEventAndState) <- c("EVTYPE", "STATE", "DMG")
+damagePerEventAndState <- damagePerEventAndState[damagePerEventAndState$DMG > 0, ]
+totalDamage <- sum(damagePerEventAndState$DMG)
+ignoreDmg <- totalDamage / 100 * 2
+
+damagePerType <- tapply(damagePerEventAndState$DMG, damagePerEventAndState$EVTYPE, sum)
+damagePerType <- sort(damagePerType[damagePerType > ignoreDmg], decreasing=TRUE)
+totalDamagePerType <- sum(damagePerType)
+percentageOfDamagesPerType <- totalDamagePerType * 100 / totalDamage
+damagingEvents <- rownames(damagePerType)
+numberOfDmgEvents <- nrow(damagePerType)
+mostDamagingEvent <- names(damagePerType[1])
+percentageOfDamageForEvent <- damagePerType[1] * 100 / damagePerType
+
+damagePerState <- tapply(damagePerEventAndState$DMG, damagePerEventAndState$STATE, sum)
+damagePerState <- sort(damagePerState[damagePerState > ignoreDmg], decreasing=TRUE)
+mostDamagedStates <- names(damagePerState)
+mostDamagedState <- as.character(states[states$Abbreviation == mostDamagedStates[1], "State"])
+numberOfDamagedStates <- nrow(mostDamagedState)
+mostDamagedStatePercentage <- damagePerState[1] * 100 / totalDamage
+
+```
+
+## Results
+
+### Which type of events are more harmful to the population health
+* The most damaging to human health in the united states is `r mostInjurningEvent`, which causes `r percentageOfInjuriesForEvent` percent of injuries accross the United States.
+* The following `r numberOfEvents` are responsible for `r percentageOfInjures` of the injuries: `r injuriesEvents`
+* `r mostAffectedState` is the most affected state which suffers `r mostAffectedStatePercentage` percent of weather related injuries in the United States.
+
+```{r fig.width=14, fig.height=8}
+par(mfrow=c(1,2))
+
+barplot(injuriesPerType / totalInjuries, 
+        main="Events causing most injuries", xaxt='n',
+        ylab="Proportion of Injuries Caused",
+        legend.text=injuriesEvents, col=rainbow(numberOfEvents))
+Axis(side=1, labels=FALSE)
+
+plotN = 20
+stateNames <- lapply(head(mostAffectedStates,plotN), 
+                     FUN=function(x) as.character(states[states$Abbreviation == x, "State"]))
+barplot(head(injuriesPerState,plotN) / totalInjuries, 
+        main="Most Affected States", xaxt='n',
+        ylab="Proportion of Injuries",
+        legend.text=stateNames, col=rainbow(plotN))
+Axis(side=1, labels=FALSE)
+```
+
+### Which type of events cause more economic damage
+* The most economically damaging event in the united states is `r mostDamagingEvent`, which causes `r percentageOfDamagesPerType` percent of economic damage accross the United States.
+* The following `r numberOfDmgEvents` are responsible for `r percentageOfDamagesPerType` of the economic damage: `r damagingEvents`
+* `r mostDamagedState` is the most affected state which suffers `r mostDamagedStatePercentage` percent of weather related economic damage in the United States.
+
+```{r fig.width=14, fig.height=9}
+par(mfrow=c(1,2))
+
+plotN = 20
+barplot(head(damagePerType,plotN) / totalDamage, 
+        main="Most Economically Damaging Events", xaxt='n',
+        ylab="Proportion of losses caused",
+        legend.text=head(damagingEvents, plotN), col=rainbow(numberOfDmgEvents))
+Axis(side=1, labels=FALSE)
+
+plotN = 20
+stateNames <- lapply(head(mostDamagedStates,plotN), 
+                     FUN=function(x) as.character(states[states$Abbreviation == x, "State"]))
+barplot(head(damagePerState,plotN) / totalDamage, 
+        main="Most Economically Affected States", xaxt='n',
+        ylab="Proportion of losses",
+        legend.text=stateNames, col=rainbow(plotN))
+Axis(side=1, labels=FALSE)
+```
