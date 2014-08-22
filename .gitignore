@@ -9,3 +9,16 @@
 
 # Ignore MAC hidden folder
 .DS_Store
+
+# Ignore cache diretories
+*_cache
+cache
+
+# Ignore input files
+*.rds
+*.csv
+*.zip
+*.tar
+*.gz
+*.tgz
+*.bz2
