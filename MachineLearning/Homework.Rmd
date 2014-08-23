@@ -12,11 +12,11 @@ output: html_document
 Train a machine learning model using the following data set:
 [Training](https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv)
 
-Then use the model to predict the class of the following dataset:
+Then use the model to predict the class of the following data set:
 [Testing](https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv)
 
-The data has infomration from sensors weared by people performing a physical excercise, each row is label as correctly performed 'A' or incorrectly perform 'B', 'C', 'D', 'E', the name of the column is 'classe'. 
-The model should predict the classe variable, there is no specific requirement about which other fields to use or not to use.
+The data has information from sensors used by people performing a physical exercise, each row is label as correctly performed 'A' or incorrectly perform 'B', 'C', 'D', 'E', the name of the column is 'classe'. 
+The model should predict the ‘classe' variable, there is no specific requirement about which other fields to use or not to use.
 
 ## Setting up the environment
 
@@ -101,35 +101,40 @@ rfModel <- train(classe ~ ., data=training, method="rf", trControl=fitControl)
 
 rfModel$results
 confusionMatrix(rfModel)
+
 ```
 
 ## Estimated Cross-Validation Error 
 
-The estimated error from the model as calculated by CARET is 0.7%. It can be found in the finalModel field.
 ```{r}
-rfModel$finalModel
+rfFinal <- rfModel$finalModel
+rfFinal
+
+rfOOB <- round(rfFinal$err.rate[rfFinal$ntree, "OOB"]*100, digits=2)
 ```
+The estimated out of bag error from the model as calculated by CARET is `r rfOOB`%. 
+It can be found in the finalModel, to extracted I used the formula above which was extracted from the R source code by an anonymous student.
 
 ## Error estimation in the Testing Set 
-
-In the lectures the recomendation is to still use a testing set that had not been used to train the model.
-The error is 1.05% and can be calculated in the following way:
 
 ```{r}
 pred <- predict(rfModel, newdata=testing)
 confMatrix <- confusionMatrix(testing$classe, pred)
 
-error <- 1 - confMatrix$overall[1]
-names(error) <- "error"
+accuracy <- confMatrix$overall[1]
+error <- round((1 - accuracy)*100, digits=2)
 
-error
 confMatrix
 ```
+
+In the lectures the recommendation is to still use a testing set that had not been used to train the model.
+The error is calculated by subtracting the Accuracy from 1, and in this case is `r error`%
+
 
 ## Conclussion
 
 The Random Forest model takes more time to train than the simple tree model but it has higher accuracy. 
-Given that it achived 98.9% accuracy I decided there is no need to try other complex model.
+Given that it achieved `r accuracy`% accuracy, Because of that I saw no need to try higher complexity models.
 
 The last step is to use the model to predict the labels for Homework evaluation data set:
 
