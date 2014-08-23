@@ -1,0 +1,164 @@
+# Regression Models - Report (OF)
+
+## Question
+
+Using the mtcars data set from R, answer the following questions:
+
+* Is an automatic or manual transmission better for MPG
+* Quantify the MPG difference between automatic and manual transmissions
+
+## Executive Summary
+
+It is not possible to answer the question with the provided data. 
+
+At first sight it looks as if automatic cars get less millage per gallon, however in the data set automatic vehicles are also heavier (692 lb). But the data does not allow to know if this is an intrinsic characteristic of automatic vehicles or if the sample selection was falwed.
+
+Adding the transmission type to a model of miles per gallon versus weight results in a model with a negative coefficient for the amManual feature, suggesting that when controlling for weight automatic cars are more efficient. But the model is notstatistically significantly better model (P-value: 0.9879) when compared with the simple model ussing annova.
+
+The best model includes the following variables
+
+In order to conclude if automatic cars are less efficient or not, we will need to research if automatic cars are intrinsically heavier than manual ones. 
+
+## Data cleaning
+
+I created a second data set 'mtcarsX' with the column 'am' converted to a factor variable.
+I used the original data set to calculate the correlations and the modified one to fit the models.
+
+```{r, results='hide', echo=FALSE, message=FALSE}
+library(datasets)
+library(ggplot2)
+require(gridExtra)
+data(mtcars)
+
+mtcarsX <- mtcars
+mtcarsX$am <- factor(mtcars$am,levels=c(0,1), labels=c("Automatic","Manual"))
+
+```
+
+## Explorartory Data Analysis 
+
+First I compared the transmission type versus the fuel efficiency using a density plot:
+
+```{r fig.width=7, fig.height=3, echo=FALSE, message=FALSE}
+
+qplot(mpg, data=mtcarsX, geom="density", fill=am, alpha=I(.5),  main="Distribution of Gas Milage", xlab="Miles Per Gallon", ylab="Density")
+
+```
+
+The results suggest that Manual transmission cars are better than automatic ones, but it is not sufficient for a conlcussion because other factors as the horse power, cylinders, or weight could influence the fuel consumption.
+
+```{r fig.width=16, fig.height=5, echo=FALSE, message=FALSE}
+plot1 <- qplot(hp, mpg, data=mtcarsX, shape=am, color=am, size=I(3), xlab="Horsepower", ylab="Miles per Gallon")
+
+plot2 <- qplot(wt, mpg, data=mtcarsX, shape=am, color=am, size=I(3), xlab="Weight", ylab="Miles per Gallon")
+grid.arrange(plot1, plot2, ncol=2)
+```
+
+This shows that in this data set the automatic cars are both heavier and have more horse power than the manual ones, which could at least partially explain the higher full consumption of automatic vehicles observed in the density graph.
+
+## Building a linear model
+
+### Model Selection Strategy
+
+To select between the possible models I decided to guide the search by the correlation between the variables, choose the variable with the highest correlation to it and then add other variables to the model then choosing the one with the lowest P-Value. 
+
+Then repeat the steps with the two predictors model to obtain a three predictors model, then repeat the process until adding variables do not result in better models.
+
+To compare the models I used annova.
+
+```{r, echo=FALSE}
+cor(mtcars)[, c(1,6,9)]
+```
+```{r, results='hide', echo=FALSE, message=FALSE}
+
+model1 <- lm(mpg ~ wt, data=mtcarsX)
+
+model2.1 <- update(model1, mpg ~ wt + cyl)
+model2.2 <- update(model1, mpg ~ wt + disp)
+model2.3 <- update(model1, mpg ~ wt + hp)
+model2.4 <- update(model1, mpg ~ wt + drat)
+model2.5 <- update(model1, mpg ~ wt + qsec)
+model2.6 <- update(model1, mpg ~ wt + vs)
+model2.7 <- update(model1, mpg ~ wt + am)
+model2.8 <- update(model1, mpg ~ wt + gear)
+model2.9 <- update(model1, mpg ~ wt + carb)
+
+a1.1 <- anova(model1, model2.1)
+a1.2 <- anova(model1, model2.2)
+a1.3 <- anova(model1, model2.3)
+a1.4 <- anova(model1, model2.4)
+a1.5 <- anova(model1, model2.5)
+a1.6 <- anova(model1, model2.6)
+a1.7 <- anova(model1, model2.7)
+a1.8 <- anova(model1, model2.8)
+a1.9 <- anova(model1, model2.9)
+
+model3.1 <- update(model2.1, mpg ~ wt + cyl + disp)
+model3.2 <- update(model2.1, mpg ~ wt + cyl + hp)
+model3.3 <- update(model2.1, mpg ~ wt + cyl + qsec)
+model3.4 <- update(model2.1, mpg ~ wt + cyl + vs)
+model3.5 <- update(model2.1, mpg ~ wt + cyl + am)
+
+a2.1 <- anova(model2.1, model3.1)
+a2.2 <- anova(model2.1, model3.2)
+a2.3 <- anova(model2.1, model3.3)
+a2.4 <- anova(model2.1, model3.4)
+a2.5 <- anova(model2.1, model3.5)
+
+```
+
+### Selected model
+
+The selected model is `mpg ~ wt + cyl`, adding `am` to this model does not result in a significantly better model. 
+
+```{r, echo=FALSE}
+summary(model2.1)
+```
+#### Diagnostigs & Confidence
+
+The following is the 95% confidence interval for the model coeficients.
+
+```{r echo=FALSE, message=FALSE}
+confint(model2.1,level=0.95)
+```
+
+```{r fig.width=16, fig.height=5, results='hide', echo=FALSE, message=FALSE}
+plot1 <- qplot(wt, resid(model2.1), data=mtcarsX, shape=am, color=am, size=I(3), xlab="Weight", ylab="Residuals (Miles per Gallon)")
+
+plot2 <- qplot(cyl, resid(model2.1), data=mtcarsX, shape=am, color=am, size=I(3), xlab="Cylinders", ylab="Residuals (Miles per Gallon)")
+
+grid.arrange(plot1, plot2, ncol=2)
+```
+
+The selected model seems to be a good fit for the data according to the diagnostig plots.
+
+```{r fig.width=16, fig.height=10, echo=FALSE, message=FALSE}
+layout(matrix(c(1,2,3,4),2,2)) # optional 4 graphs/page 
+plot(model2.1)
+```
+
+# Appendices
+
+## Data Description 
+[Source](http://stat.ethz.ch/R-manual/R-devel/library/datasets/html/mtcars.html)
+
+A data frame with 32 observations on 11 variables. 
+
+* mpg   Miles/(US) gallon
+*	cyl	 Number of cylinders
+* disp	 Displacement (cu.in.)
+* hp	 Gross horsepower
+* drat	 Rear axle ratio
+* wt	 Weight (lb/1000)
+* qsec	 1/4 mile time
+* vs	 V/S
+* am	 Transmission (0 = automatic, 1 = manual)
+* gear	 Number of forward gears
+* carb	 Number of carburetors
+
+## Sample of Fitted Models
+```{r, echo=FALSE}
+model1
+model2.1
+a2.1
+```
