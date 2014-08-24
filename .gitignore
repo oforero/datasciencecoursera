@@ -22,3 +22,6 @@ cache
 *.gz
 *.tgz
 *.bz2
+
+# Ignore Vi swap files
+*.swp
