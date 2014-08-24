@@ -14,7 +14,7 @@ shinyUI(fluidPage(theme = "bootstrap.css",
   fluidRow(
     h3("Help"),
     p("This is an implementation of the game, you can play up to 500 turns agains the computer"),
-    p("The computer has already played 500 turns and will not use your input to choose. "),
+    p("The computer has already played 1000 turns and will not use your input to choose. "),
     p("On every play the histograms for your moves, the computer moves and the score will be updated."),
     br(),
     p("The ruleas of the game are (alo look at the figure):"),
