@@ -96,6 +96,14 @@ runGitHub(&quot;datasciencecoursera&quot;, &quot;oforero&quot;, subdir=&quot;Dat
 
 <p>A future version may include a random test for your input.</p>
 
+<p>For the moment it does sampling with replacement:</p>
+
+<pre><code class="r">labels &lt;- c(&quot;rock&quot;, &quot;paper&quot;, &quot;scissors&quot;, &quot;lizzard&quot;, &quot;spock&quot;)
+ai &lt;- sample(0:4, 1000, replace=TRUE) 
+ai.f &lt;- factor(ai, 0:4, labels=labels)
+plot(ai.f)
+</code></pre>
+
   </article>
   <!-- Presenter Notes -->
 </slide>
@@ -107,7 +115,7 @@ runGitHub(&quot;datasciencecoursera&quot;, &quot;oforero&quot;, subdir=&quot;Dat
   <article data-timings="">
     <p>The computer samples with replacement from the list of options. Future version of the game will allow you to play against different sampling strategies.</p>
 
-<p><img src="assets/fig/unnamed-chunk-2.png" alt="plot of chunk unnamed-chunk-2"> </p>
+<p><img src="assets/fig/unnamed-chunk-3.png" alt="plot of chunk unnamed-chunk-3"> </p>
 
   </article>
   <!-- Presenter Notes -->

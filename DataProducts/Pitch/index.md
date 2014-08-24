@@ -51,13 +51,23 @@ Try the application by running the above commands, if you play random choices yo
 
 A future version may include a random test for your input.
 
+For the moment it does sampling with replacement:
+
+
+```r
+labels <- c("rock", "paper", "scissors", "lizzard", "spock")
+ai <- sample(0:4, 1000, replace=TRUE) 
+ai.f <- factor(ai, 0:4, labels=labels)
+plot(ai.f)
+```
+
 --- .class #id 
 
 ## Slide 5 - How does the computer plays?
 
 The computer samples with replacement from the list of options. Future version of the game will allow you to play against different sampling strategies.
 
-![plot of chunk unnamed-chunk-2](assets/fig/unnamed-chunk-2.png) 
+![plot of chunk unnamed-chunk-3](assets/fig/unnamed-chunk-3.png) 
 
 
 
