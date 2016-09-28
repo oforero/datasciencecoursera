@@ -1,0 +1,73 @@
+---
+title: "Data Science - JHU - Capstone - Milestone"
+author: 'Oscar Forero'
+date: "16 November 2014"
+output: html_document
+---
+
+<link href="https://raw.githubusercontent.com/jasonm23/markdown-css-themes/gh-pages/markdown7.css" rel="stylesheet"></link>
+
+```{r, echo=FALSE, message=FALSE, error=FALSE}
+library(knitr)
+library(wordcloud)
+load(".RData")
+```
+
+First I downloaded and sampled the files at 30% to do some exploratory analysis. One of the first things I noticed was that the file contained NULL and it was in windows format which was creating problems for me. For this reason the first step I took was to translate the files to *unix* format using the following command:
+
+```{r fix-files, engine='bash', eval=FALSE}
+tr -cd '\11\12\40-\176' < en_US/en_US.news.txt | dos2unix > en_US_fix/en_US.news.txt
+tr -cd '\11\12\40-\176' < en_US/en_US.blogs.txt | dos2unix > en_US_fix/en_US.blogs.txt
+tr -cd '\11\12\40-\176' < en_US/en_US.twitter.txt | dos2unix > en_US_fix/en_US.twitter.txt
+```
+
+In order to sample I first obtained the total number of lines with a library function. Then generated a sample of 30% of numbers between 1 and the size of each file without replacement.
+
+To obtain the actual lines I used the *sed* command from *unix*. I created a temporary file with the selection commands to be used with *sed*, then execute a system2 call. 
+
+This was a pretty expensive step, I saved the samples into a new directory from which I could just read the smaller files as necessary.
+
+The project mentioned the need to deal with profanity, suggesting removing the offensive words from the input. I don't think this is a good idea without at least a strong definition of what should be considered offensive.
+
+For example a [list](http://www.cs.cmu.edu/~biglou/resources/bad-words.txt) provided by [professor Luis von Ahn from Carnegie Mellon](http://www.cs.cmu.edu/~biglou/resources/) includes 1383 words which include words like adult and africa, this is clearly excessive.
+
+To get a feel for how much of a problem is profanity really I decided to use the famous [7 dirty words](http://en.wikipedia.org/wiki/Seven_dirty_words) as a proxy to estimate the porcentage of documents containing *offensive* words.
+
+From the point of view of a product for users like autocomplete it may be valuable to not automatically generate highly embarrassing words like the seven in the above list.
+
+Then I performed some basic summary counting the words, lines, and lines with profanity in the original files and in the sample.
+
+```{r, echo=FALSE, results='asis'}
+kable(sumDF, format='html')
+```
+
+Plotting the proportion of lines with at least one of the *7 dirty words* give us a sense that there isn't much of a profanity problem.
+
+```{r, echo=FALSE, fig.align='center'}
+barplot(prof, main="Proportion of profanity in Documents")
+```
+
+And plotting the proportion of unique words in the sample versus unique words in the complete file show us that the quality of sample was high.
+
+```{r, echo=FALSE, fig.align='center'}
+barplot(wordsS, main="Unique Words in Sample / Unique Words in Documents")
+```
+
+Not all words are equally used across sources, like it can be appreciated in the following word cloud of the 500 most used words for each source (After removing stop words like I, the, etc).
+
+## 500 most common words in Blog comments
+```{r, echo=FALSE, fig.align='center', warning=FALSE, error=FALSE, cache=TRUE}
+wordcloud(blogWC$Word, blogWC$Count)
+```
+
+## 500 most common words in News comments
+```{r, echo=FALSE, fig.align='center', warning=FALSE, error=FALSE, cache=TRUE}
+wordcloud(newsWC$Word, newsWC$Count)
+```
+
+## 500 most common words in Twitter
+```{r, echo=FALSE, fig.align='center', warning=FALSE, error=FALSE, cache=TRUE}
+wordcloud(twitterWC$Word, twitterWC$Count)
+```
+
+
